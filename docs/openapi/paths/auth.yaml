@@ -1,0 +1,321 @@
+register:
+  post:
+    summary: Register user
+    security: []
+    tags: [Auth]
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/requests/user/RegisterRequest.yaml
+    responses:
+      '201':
+        description: Registration successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: ../components/schemas/http/created201.yaml
+                - type: object
+                  required:
+                    - data
+                  properties:
+                    data:
+                      $ref: ../components/schemas/responses/user/UserCreated.yaml
+      '400':
+        description: Registration bad request
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: ../components/schemas/http/badRequest400.yaml
+                - type: object
+                  required:
+                    - errors
+                  properties:
+                    errors:
+                      type: object
+                      example:
+                        username:
+                          - 'username required'
+                          - 'username minimum has 6 characters'
+                        password:
+                          - 'password required'
+                          - 'password minimum has 6 characters'
+      '409':
+        description: Registration conflict
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: ../components/schemas/http/conflict409.yaml
+                - type: object
+                  required:
+                    - error
+                  properties:
+                    error:
+                      type: object
+                      example: 'username already exists'
+      '500':
+        $ref: ../components/schemas/http/error500.yaml
+
+login:
+  post:
+    summary: Login user
+    security: []
+    tags: [Auth]
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/requests/user/LoginRequest.yaml
+    responses:
+      '200':
+        description: Login successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: ../components/schemas/http/accepted200.yaml
+                - type: object
+                  required:
+                    - data
+                  properties:
+                    data:
+                      $ref: ../components/schemas/responses/user/UserLogin.yaml
+      '400':
+        description: Login bad request
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: ../components/schemas/http/badRequest400.yaml
+                - type: object
+                  required:
+                    - errors
+                  properties:
+                    errors:
+                      type: object
+                      example:
+                        username:
+                          - 'username required'
+                          - 'username minimum has 6 characters'
+                          - 'username invalid'
+                        password:
+                          - 'password required'
+                          - 'password minimum has 6 characters'
+                          - 'password invalid'
+      '500':
+        $ref: ../components/schemas/http/error500.yaml
+
+getUsers:
+  get:
+    summary: Get users
+    tags: [User]
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: Get users accepted
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: ../components/schemas/http/accepted200.yaml
+                - type: object
+                  required:
+                    - data
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: ../components/schemas/responses/user/UserCreated.yaml
+      '401':
+        description: Get users unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/http/unauthorized401.yaml
+      '403':
+        description: Get users forbidden
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/http/forbidden403.yaml
+      '500':
+        $ref: ../components/schemas/http/error500.yaml
+
+getUserById:
+  get:
+    summary: Get user by id
+    tags: [User]
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    responses:
+      '200':
+        description: Get user by id accepted
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: ../components/schemas/http/accepted200.yaml
+                - type: object
+                  required:
+                    - data
+                  properties:
+                    data:
+                      $ref: ../components/schemas/responses/user/UserCreated.yaml
+      '401':
+        description: Get user by id unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/http/unauthorized401.yaml
+      '403':
+        description: Get user by id forbidden
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/http/forbidden403.yaml
+      '404':
+        description: Get user by id not found
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/http/notFound404.yaml
+      '500':
+        $ref: ../components/schemas/http/error500.yaml
+
+updateUser:
+  patch:
+    summary: Update user by id
+    tags: [User]
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/requests/user/UserUpdatedRequest.yaml
+    responses:
+      '200':
+        description: Update user by id accepted
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: ../components/schemas/http/accepted200.yaml
+                - type: object
+                  required:
+                    - data
+                  properties:
+                    data:
+                      $ref: ../components/schemas/responses/user/UserUpdated.yaml
+      '400':
+        description: Update user by id bad request
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: ../components/schemas/http/badRequest400.yaml
+                - type: object
+                  required:
+                    - errors
+                  properties:
+                    errors:
+                      type: object
+                      example:
+                        username:
+                          - 'username required'
+                          - 'username minimum has 6 characters'
+                        password:
+                          - 'password minimum has 6 characters'
+      '409':
+        description: Registration conflict
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: ../components/schemas/http/conflict409.yaml
+                - type: object
+                  required:
+                    - error
+                  properties:
+                    error:
+                      type: object
+                      example: 'username already exists'
+      '401':
+        description: Update user by id unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/http/unauthorized401.yaml
+      '403':
+        description: Update user by id forbidden
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/http/forbidden403.yaml
+      '404':
+        description: Update user by id not found
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/http/notFound404.yaml
+      '500':
+        $ref: ../components/schemas/http/error500.yaml
+
+deleteUser:
+  delete:
+    summary: Delete user by id
+    tags: [User]
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    responses:
+      '200':
+        description: Delete user by id accepted
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/http/accepted200.yaml
+      '401':
+        description: Delete user by id unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/http/unauthorized401.yaml
+      '403':
+        description: Delete user by id forbidden
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/http/forbidden403.yaml
+      '404':
+        description: Delete user by id not found
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/http/notFound404.yaml
+      '500':
+        $ref: ../components/schemas/http/error500.yaml

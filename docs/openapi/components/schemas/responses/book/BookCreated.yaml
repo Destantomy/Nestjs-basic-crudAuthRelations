@@ -1,0 +1,27 @@
+type: object
+required:
+  - id
+  - title
+  - author
+  - createdAt
+  - updatedAt
+properties:
+  id:
+    type: string
+    format: uuid
+    example: book-550e8400-e29b-41d4-a716-446655440000
+  title:
+    type: string
+    example: rhetoric
+  author:
+    $ref: ../user/UserRelation.yaml
+    description: User who wrote the book
+    readOnly: true
+  createdAt:
+    type: string
+    format: date-time
+    example: 2026-01-18T10:30:00Z
+  updatedAt:
+    type: string
+    format: date-time
+    example: 2026-01-18T10:30:00Z

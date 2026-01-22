@@ -1,0 +1,9 @@
+type: object
+properties:
+  username:
+    type: string
+    example: stagiritis
+  password:
+    type: string
+    format: password
+    example: secret12345

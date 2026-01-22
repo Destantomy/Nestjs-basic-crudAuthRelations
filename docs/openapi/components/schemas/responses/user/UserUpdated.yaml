@@ -1,0 +1,13 @@
+type: object
+properties:
+  username:
+    type: string
+    example: stagiritis
+  password:
+    type: string
+    format: password
+    example: secret12345
+  updatedAt:
+    type: string
+    format: date-time
+    example: 2026-01-18T10:30:00Z

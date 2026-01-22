@@ -1,0 +1,39 @@
+openapi: 3.0.3
+info:
+  title: Nestjs basic CRUD app using MongoDB
+  description: This app is built to did some practice developing app using Nestjs and MongoDB
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080/api
+
+security:
+  - bearerAuth: []
+
+paths:
+  /auth/register:
+    $ref: ./paths/auth.yaml#/register
+  /auth/login:
+    $ref: ./paths/auth.yaml#/login
+  /users:
+    $ref: ./paths/auth.yaml#/getUsers
+  /user/{id}:
+    $ref: ./paths/auth.yaml#/getUserById
+  /user/update/{id}:
+    $ref: ./paths/auth.yaml#/updateUser
+  /user/delete/{id}:
+    $ref: ./paths/auth.yaml#/deleteUser
+  /book/post:
+    $ref: ./paths/books.yaml#/postBook
+  /books:
+    $ref: ./paths/books.yaml#/getBooks
+  /book/{id}:
+    $ref: ./paths/books.yaml#/getBookById
+  /book/update/{id}:
+    $ref: ./paths/books.yaml#/updateBook
+  /book/delete/{id}:
+    $ref: ./paths/books.yaml#/deleteBook
+
+components:
+  securitySchemes:
+    $ref: ./components/securitySchemes.yaml
