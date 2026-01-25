@@ -66,8 +66,13 @@ export class AuthService {
     };
   }
 
-  findAll() {
-    return `This action returns all auth`;
+  async findAll() {
+    const data = await this.userModel.find();
+    return {
+      status: 200,
+      message: 'accepted',
+      data: data,
+    };
   }
 
   findOne(id: number) {
