@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  HttpCode,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
@@ -26,6 +27,7 @@ export class AuthController {
   }
 
   @Post('login')
+  @HttpCode(200)
   login(@Body() loginAuthDto: LoginAuthDto) {
     return this.authService.login(loginAuthDto);
   }
@@ -33,8 +35,13 @@ export class AuthController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @Get('users')
-  findAll() {
-    return this.authService.findAll();
+  async findAll() {
+    const users = await this.authService.findAll();
+    return {
+      statusCode: 200,
+      message: 'accepted',
+      data: users,
+    };
   }
 
   @Get(':id')
