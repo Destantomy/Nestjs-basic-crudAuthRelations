@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   HttpCode,
+  Req,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
@@ -26,8 +27,8 @@ export class AuthController {
     return this.authService.create(createAuthDto);
   }
 
-  @Post('login')
   @HttpCode(200)
+  @Post('login')
   login(@Body() loginAuthDto: LoginAuthDto) {
     return this.authService.login(loginAuthDto);
   }
@@ -44,18 +45,75 @@ export class AuthController {
     };
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authService.findOne(+id);
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @HttpCode(200)
+  @Get('user/:uuid')
+  async findOne(@Param('uuid') uuid: string) {
+    const user = await this.authService.findOne(uuid);
+    return {
+      statusCode: 200,
+      message: 'accepted',
+      data: user,
+    };
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-    return this.authService.update(+id, updateAuthDto);
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(200)
+  @Get('me')
+  async getMe(@Req() req) {
+    const me = await this.authService.getMe(req.user.sub);
+    // console.log(me);
+    return {
+      statusCode: 200,
+      message: 'accepted',
+      data: me,
+    };
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authService.remove(+id);
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @HttpCode(200)
+  @Patch('user/:uuid')
+  async update(
+    @Param('uuid') uuid: string,
+    @Body() updateAuthDto: UpdateAuthDto,
+  ) {
+    const updatedUser = await this.authService.update(uuid, updateAuthDto);
+    return {
+      statusCode: 200,
+      message: 'accepted',
+      data: updatedUser,
+    };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(200)
+  @Patch('me')
+  async updateMe(@Req() req, @Body() updateAuthDto: UpdateAuthDto) {
+    const updatedMe = await this.authService.updateMe(
+      req.user.sub,
+      updateAuthDto,
+    );
+    return {
+      statusCode: 200,
+      message: 'accepted',
+      data: updatedMe,
+    };
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @HttpCode(204)
+  @Delete('user/:uuid')
+  async remove(@Param('uuid') uuid: string, @Req() req) {
+    await this.authService.remove(uuid, req.user.sub);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(204)
+  @Delete('me')
+  async removeMe(@Req() req) {
+    await this.authService.removeMe(req.user.sub);
   }
 }
