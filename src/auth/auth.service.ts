@@ -55,24 +55,17 @@ export class AuthService {
     const accessToken = this.jwtService.sign(payload);
 
     return {
-      status: 200,
-      message: 'accepted',
-      data: {
-        username: user.username,
-        accessToken,
-        tokenType: 'Bearer',
-        expiresIn: 3600,
-      },
+      username: user.username,
+      accessToken: accessToken,
+      tokenType: 'Bearer',
+      expiresIn: 3600,
     };
   }
 
   async findAll() {
-    const data = await this.userModel.find();
-    return {
-      status: 200,
-      message: 'accepted',
-      data: data,
-    };
+    return await this.userModel
+      .find()
+      .select('uuid username role createdAt updatedAt');
   }
 
   findOne(id: number) {
