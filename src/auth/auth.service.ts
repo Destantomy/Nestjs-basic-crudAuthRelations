@@ -1,6 +1,8 @@
 import {
   ConflictException,
+  ForbiddenException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { CreateAuthDto } from './dto/create-auth.dto';
@@ -46,6 +48,15 @@ export class AuthService {
       throw new UnauthorizedException('invalid credentials');
     }
 
+    const isPasswordValid = await bcrypt.compare(
+      loginAuthDto.password,
+      user.password,
+    );
+
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('invalid credentials');
+    }
+
     const payload = {
       sub: user.uuid,
       username: user.username,
@@ -68,15 +79,108 @@ export class AuthService {
       .select('uuid username role createdAt updatedAt');
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
+  async findOne(uuid: string) {
+    const user = await this.userModel
+      .findOne({ uuid })
+      .select('uuid username role createdAt updatedAt');
+
+    if (!user) {
+      throw new NotFoundException('user not found');
+    }
+
+    return user;
   }
 
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
+  async getMe(uuid: string) {
+    const me = await this.userModel
+      .findOne({ uuid: uuid.startsWith('user-') ? uuid : `user-${uuid}` })
+      .select('uuid username role createdAt updatedAt');
+
+    if (!me) {
+      throw new NotFoundException('user not found');
+    }
+
+    return me;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+  async update(uuid: string, updateAuthDto: UpdateAuthDto) {
+    try {
+      const user = await this.userModel.findOne({ uuid });
+      if (!user) {
+        throw new NotFoundException('user not found');
+      }
+      // whitelist for admin
+      if (updateAuthDto.username) {
+        user.username = updateAuthDto.username;
+      }
+      if (updateAuthDto.password) {
+        user.password = await bcrypt.hash(updateAuthDto.password, 8);
+      }
+      if ((updateAuthDto as any).role) {
+        user.role = (updateAuthDto as any).role;
+      }
+      await user.save();
+      const { password, ...result } = user.toObject();
+      return result;
+    } catch (error) {
+      // error code 11000 is a status code builtin from MongoDB to handling existed data
+      if (error.code === 11000) {
+        throw new ConflictException('username already exists');
+      }
+      throw error;
+    }
+  }
+
+  async updateMe(uuid: string, updateAuthDto: UpdateAuthDto) {
+    try {
+      const user = await this.userModel.findOne({ uuid });
+      if (!user) {
+        throw new NotFoundException('user not found');
+      }
+      // whitelist for user
+      if (updateAuthDto.username) {
+        user.username = updateAuthDto.username;
+      }
+      if (updateAuthDto.password) {
+        user.password = await bcrypt.hash(updateAuthDto.password, 8);
+      }
+      await user.save();
+      const { password, role, ...result } = user.toObject();
+      return result;
+    } catch (error) {
+      // error code 11000 is a status code builtin from MongoDB to handling existed data
+      if (error.code === 11000) {
+        throw new ConflictException('username already exists');
+      }
+      throw error;
+    }
+  }
+
+  async remove(targetUuid: string, requesterUuid: string) {
+    // admin is prohibited to delete itself
+    if (targetUuid === requesterUuid) {
+      throw new ForbiddenException('admin cannot delete itself');
+    }
+    const user = await this.userModel.findOne({ uuid: targetUuid });
+    if (!user) {
+      throw new NotFoundException('user not found');
+    }
+    // optional hardening
+    if (user.role === 'admin') {
+      throw new ForbiddenException('cannot delete another admin');
+    }
+
+    await user.deleteOne();
+  }
+
+  async removeMe(userUuid: string) {
+    const user = await this.userModel.findOne({ uuid: userUuid });
+    if (!user) {
+      throw new NotFoundException('user not found');
+    }
+    if (user.role === 'admin') {
+      throw new ForbiddenException('admin cannot delete itself');
+    }
+    await user.deleteOne();
   }
 }
