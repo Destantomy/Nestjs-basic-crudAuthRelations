@@ -12,6 +12,21 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any) {
-    return payload; // enter into req.user
+    // payload; // enter into req.user
+    /**
+     * payload is a JWT content payload while login :
+     * {
+     *    sub: uuid,
+     *    username: string,
+     *    role: string,
+     *    iat: number,
+     *    exp: number,
+     * }
+     */
+    return {
+      userId: payload.sub,
+      username: payload.username,
+      role: payload.role,
+    };
   }
 }
