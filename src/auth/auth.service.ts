@@ -9,7 +9,7 @@ import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from 'src/schemas/user.schema';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { LoginAuthDto } from './dto/login-auth.dto';
@@ -58,7 +58,7 @@ export class AuthService {
     }
 
     const payload = {
-      sub: user.uuid,
+      sub: user._id.toString(), // must be ObjectId,
       username: user.username,
       role: user.role,
     };
@@ -173,14 +173,17 @@ export class AuthService {
     await user.deleteOne();
   }
 
-  async removeMe(userUuid: string) {
-    const user = await this.userModel.findOne({ uuid: userUuid });
-    if (!user) {
+  async removeMe(user: { _id: mongoose.Types.ObjectId }, userUuid: string) {
+    const users = await this.userModel.findOne({
+      _id: user._id,
+      uuid: userUuid,
+    });
+    if (!users) {
       throw new NotFoundException('user not found');
     }
-    if (user.role === 'admin') {
+    if (users.role === 'admin') {
       throw new ForbiddenException('admin cannot delete itself');
     }
-    await user.deleteOne();
+    await users.deleteOne();
   }
 }

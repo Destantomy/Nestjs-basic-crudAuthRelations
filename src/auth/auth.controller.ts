@@ -14,9 +14,9 @@ import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { LoginAuthDto } from './dto/login-auth.dto';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { RolesGuard } from './guards/roles.guard';
-import { Roles } from './decorators/roles.decorator';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { RolesGuard } from '../guards/roles.guard';
+import { Roles } from '../decorators/roles.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -112,8 +112,8 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @HttpCode(204)
-  @Delete('me')
-  async removeMe(@Req() req) {
-    await this.authService.removeMe(req.user.sub);
+  @Delete('me/:uuid')
+  async removeMe(@Req() req, @Param('uuid') uuid: string) {
+    await this.authService.removeMe(req.user, uuid);
   }
 }
