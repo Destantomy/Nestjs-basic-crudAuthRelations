@@ -59,6 +59,7 @@ export class AuthService {
 
     const payload = {
       sub: user._id.toString(), // must be ObjectId,
+      uuid: user.uuid,
       username: user.username,
       role: user.role,
     };
@@ -173,17 +174,14 @@ export class AuthService {
     await user.deleteOne();
   }
 
-  async removeMe(user: { _id: mongoose.Types.ObjectId }, userUuid: string) {
-    const users = await this.userModel.findOne({
-      _id: user._id,
-      uuid: userUuid,
-    });
-    if (!users) {
+  async removeMe(userUuid: string) {
+    const user = await this.userModel.findOne({ uuid: userUuid });
+    if (!user) {
       throw new NotFoundException('user not found');
     }
-    if (users.role === 'admin') {
+    if (user.role === 'admin') {
       throw new ForbiddenException('admin cannot delete itself');
     }
-    await users.deleteOne();
+    await user.deleteOne();
   }
 }
