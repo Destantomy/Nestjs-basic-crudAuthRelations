@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { MongooseModule } from '@nestjs/mongoose';
+import { BookModule } from './book/book.module';
 
 @Module({
   imports: [
@@ -10,6 +11,7 @@ import { MongooseModule } from '@nestjs/mongoose';
     }),
     AuthModule,
     MongooseModule.forRoot('mongodb://localhost:27017/'),
+    BookModule,
   ],
   controllers: [],
   providers: [],

@@ -24,3 +24,15 @@ export class User {
 export const UserSchema = SchemaFactory.createForClass(User);
 UserSchema.index({ uuid: 1 }, { unique: true });
 UserSchema.index({ username: 1 }, { unique: true }); // this syntax of code will force Mongoose to ensuring that data not duplicated
+
+// virtual populate used for relation to books have been written
+UserSchema.virtual('books', {
+  // the 'books' above will give you the field 'books' in response later
+  ref: 'Book', // it came from: export const BookSchema = SchemaFactory.createForClass(Book);
+  localField: '_id', // it came from current _id user logged in (local)
+  foreignField: 'author', // it came from author: mongoose.Types.ObjectId | User; in book.schema.ts
+});
+
+// enabling virtual above in response later
+UserSchema.set('toJSON', { virtuals: true });
+UserSchema.set('toObject', { virtuals: true });
