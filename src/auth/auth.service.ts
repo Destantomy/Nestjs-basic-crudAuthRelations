@@ -77,13 +77,21 @@ export class AuthService {
   async findAll() {
     return await this.userModel
       .find()
-      .select('uuid username role createdAt updatedAt');
+      .select('uuid username role createdAt updatedAt')
+      .populate({
+        path: 'books',
+        select: 'uuid title createdAt updatedAt',
+      });
   }
 
   async findOne(uuid: string) {
     const user = await this.userModel
       .findOne({ uuid })
-      .select('uuid username role createdAt updatedAt');
+      .select('uuid username role createdAt updatedAt')
+      .populate({
+        path: 'books',
+        select: 'uuid title createdAt updatedAt',
+      });
 
     if (!user) {
       throw new NotFoundException('user not found');
@@ -95,7 +103,11 @@ export class AuthService {
   async getMe(uuid: string) {
     const me = await this.userModel
       .findOne({ uuid: uuid.startsWith('user-') ? uuid : `user-${uuid}` })
-      .select('uuid username role createdAt updatedAt');
+      .select('uuid username role createdAt updatedAt')
+      .populate({
+        path: 'books',
+        select: 'uuid title createdAt updatedAt',
+      });
 
     if (!me) {
       throw new NotFoundException('user not found');
