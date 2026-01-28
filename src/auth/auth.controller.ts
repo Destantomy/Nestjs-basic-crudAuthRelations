@@ -62,7 +62,7 @@ export class AuthController {
   @HttpCode(200)
   @Get('me')
   async getMe(@Req() req) {
-    const me = await this.authService.getMe(req.user.sub);
+    const me = await this.authService.getMe(req.user.uuid);
     // console.log(me);
     return {
       statusCode: 200,
@@ -92,7 +92,7 @@ export class AuthController {
   @Patch('me')
   async updateMe(@Req() req, @Body() updateAuthDto: UpdateAuthDto) {
     const updatedMe = await this.authService.updateMe(
-      req.user.sub,
+      req.user.uuid,
       updateAuthDto,
     );
     return {
@@ -107,13 +107,13 @@ export class AuthController {
   @HttpCode(204)
   @Delete('user/:uuid')
   async remove(@Param('uuid') uuid: string, @Req() req) {
-    await this.authService.remove(uuid, req.user.sub);
+    await this.authService.remove(uuid, req.user.uuid);
   }
 
   @UseGuards(JwtAuthGuard)
   @HttpCode(204)
-  @Delete('me/:uuid')
-  async removeMe(@Req() req, @Param('uuid') uuid: string) {
-    await this.authService.removeMe(req.user, uuid);
+  @Delete('me')
+  async removeMe(@Req() req) {
+    await this.authService.removeMe(req.user.uuid);
   }
 }
